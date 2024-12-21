@@ -11,9 +11,14 @@ public:
 
     bool connectToDatabase();
     void closeDatabase();
+    void setConnectionDetails(const QString &host, int port, const QString &user, const QString &password);
 
 private:
+    QString host;
+    int port;
+    QString user;
+    QString password;
     PGconn *conn;
 };
 
-#endif
+#endif // DATABASEMANAGER_H

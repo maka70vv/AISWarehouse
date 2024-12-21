@@ -5,6 +5,9 @@
 #include <QTableWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QLineEdit>
+#include <QLabel>
+#include <QDialog>
 #include "DatabaseManager.h"
 
 class MainWindow : public QMainWindow {
@@ -15,7 +18,8 @@ public:
     ~MainWindow();
 
     private slots:
-        void addProduct();
+        void openDatabaseDialog();
+    void addProduct();
     void editProduct();
     void deleteProduct();
     void generateReport();
@@ -26,7 +30,11 @@ private:
     QPushButton *editButton;
     QPushButton *deleteButton;
     QPushButton *reportButton;
+    QPushButton *dbConfigButton;
     DatabaseManager dbManager;
+
+    void initializeUI();
+    void setupConnections();
 };
 
-#endif
+#endif // MAINWINDOW_H
