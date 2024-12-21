@@ -1,0 +1,5 @@
+/home/makarov/CLionProjects/AISWarehouseCPP/build/CMakeFiles/AISWarehouseCPP.dir
+/home/makarov/CLionProjects/AISWarehouseCPP/build/CMakeFiles/edit_cache.dir
+/home/makarov/CLionProjects/AISWarehouseCPP/build/CMakeFiles/rebuild_cache.dir
+/home/makarov/CLionProjects/AISWarehouseCPP/build/CMakeFiles/AISWarehouseCPP_autogen_timestamp_deps.dir
+/home/makarov/CLionProjects/AISWarehouseCPP/build/CMakeFiles/AISWarehouseCPP_autogen.dir
