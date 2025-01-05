@@ -1,103 +1,132 @@
 #include "MainWindow.h"
+#include <QVBoxLayout>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QLabel>
+#include <QTableWidget>
 #include <QMessageBox>
-#include <QInputDialog>
-#include <QFormLayout>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    initializeUI();
-    setupConnections();
-    dbManager.connectToDatabase(); // Подключение к базе данных при запуске
+    setupTabs();
 }
 
-MainWindow::~MainWindow() {
-    dbManager.closeDatabase();
+MainWindow::~MainWindow() {}
+
+void MainWindow::setupTabs() {
+    tabWidget = new QTabWidget(this);
+    setCentralWidget(tabWidget);
+
+    // Инициализация вкладок
+    productsTab = new QWidget();
+    operationsTab = new QWidget();
+    usersTab = new QWidget();
+    reportsTab = new QWidget();
+
+    // Добавление вкладок
+    tabWidget->addTab(productsTab, "Товары");
+    tabWidget->addTab(operationsTab, "Операции");
+    tabWidget->addTab(usersTab, "Пользователи");
+    tabWidget->addTab(reportsTab, "Отчеты");
+
+    // Настройка UI для каждой вкладки
+    setupProductsUI(productsTab);
+    setupOperationsUI(operationsTab);
+    setupUsersUI(usersTab);
+    setupReportsUI(reportsTab);
 }
 
-void MainWindow::initializeUI() {
-    auto *layout = new QVBoxLayout;
+// ------------------ Товары ------------------
 
-    productTable = new QTableWidget(this);
-    productTable->setColumnCount(5);
-    productTable->setHorizontalHeaderLabels({"Name", "SKU", "Category", "Price", "Quantity"});
+void MainWindow::setupProductsUI(QWidget *parent) {
+    auto *layout = new QVBoxLayout(parent);
 
-    addButton = new QPushButton("Add Product", this);
-    editButton = new QPushButton("Edit Product", this);
-    deleteButton = new QPushButton("Delete Product", this);
-    reportButton = new QPushButton("Generate Report", this);
-    dbConfigButton = new QPushButton("Database Config", this);
+    auto *nameEdit = new QLineEdit(parent);
+    auto *skuEdit = new QLineEdit(parent);
+    auto *categoryEdit = new QLineEdit(parent);
+    auto *descriptionEdit = new QLineEdit(parent);
+    auto *unitEdit = new QLineEdit(parent);
+    auto *priceEdit = new QLineEdit(parent);
+    auto *quantityEdit = new QLineEdit(parent);
 
-    layout->addWidget(productTable);
+    layout->addWidget(new QLabel("Название:", parent));
+    layout->addWidget(nameEdit);
+    layout->addWidget(new QLabel("Артикул:", parent));
+    layout->addWidget(skuEdit);
+    layout->addWidget(new QLabel("Категория:", parent));
+    layout->addWidget(categoryEdit);
+    layout->addWidget(new QLabel("Описание:", parent));
+    layout->addWidget(descriptionEdit);
+    layout->addWidget(new QLabel("Единица измерения:", parent));
+    layout->addWidget(unitEdit);
+    layout->addWidget(new QLabel("Цена:", parent));
+    layout->addWidget(priceEdit);
+    layout->addWidget(new QLabel("Количество:", parent));
+    layout->addWidget(quantityEdit);
+
+    auto *table = new QTableWidget(parent);
+    table->setObjectName("productsTable");
+    table->setColumnCount(8);
+    table->setHorizontalHeaderLabels({"ID", "Название", "Артикул", "Категория", "Описание", "Единица", "Цена", "Количество"});
+    layout->addWidget(table);
+
+    auto *addButton = new QPushButton("Добавить", parent);
+    auto *editButton = new QPushButton("Редактировать", parent);
+    auto *deleteButton = new QPushButton("Удалить", parent);
+    auto *refreshButton = new QPushButton("Обновить", parent);
+
     layout->addWidget(addButton);
     layout->addWidget(editButton);
     layout->addWidget(deleteButton);
-    layout->addWidget(reportButton);
-    layout->addWidget(dbConfigButton);
+    layout->addWidget(refreshButton);
 
-    auto *centralWidget = new QWidget(this);
-    centralWidget->setLayout(layout);
-    setCentralWidget(centralWidget);
-}
-
-void MainWindow::setupConnections() {
-    connect(addButton, &QPushButton::clicked, this, &MainWindow::addProduct);
-    connect(editButton, &QPushButton::clicked, this, &MainWindow::editProduct);
-    connect(deleteButton, &QPushButton::clicked, this, &MainWindow::deleteProduct);
-    connect(reportButton, &QPushButton::clicked, this, &MainWindow::generateReport);
-    connect(dbConfigButton, &QPushButton::clicked, this, &MainWindow::openDatabaseDialog);
-}
-
-void MainWindow::openDatabaseDialog() {
-    QDialog dialog(this);
-    dialog.setWindowTitle("Database Configuration");
-
-    QFormLayout form(&dialog);
-    QLineEdit *hostEdit = new QLineEdit(&dialog);
-    QLineEdit *portEdit = new QLineEdit(&dialog);
-    QLineEdit *userEdit = new QLineEdit(&dialog);
-    QLineEdit *passwordEdit = new QLineEdit(&dialog);
-
-    form.addRow("Host:", hostEdit);
-    form.addRow("Port:", portEdit);
-    form.addRow("User:", userEdit);
-    form.addRow("Password:", passwordEdit);
-
-    QPushButton *okButton = new QPushButton("OK", &dialog);
-    QPushButton *cancelButton = new QPushButton("Cancel", &dialog);
-    QHBoxLayout buttons;
-    buttons.addWidget(okButton);
-    buttons.addWidget(cancelButton);
-
-    form.addRow(&buttons);
-
-    connect(okButton, &QPushButton::clicked, [&]() {
-        dbManager.setConnectionDetails(
-            hostEdit->text(),
-            portEdit->text().toInt(),
-            userEdit->text(),
-            passwordEdit->text()
-        );
-        dialog.accept();
+    connect(addButton, &QPushButton::clicked, [this, nameEdit, skuEdit, categoryEdit, descriptionEdit, unitEdit, priceEdit, quantityEdit]() {
+        if (!dbManager.addProduct(
+                nameEdit->text(), skuEdit->text(), categoryEdit->text().toInt(),
+                descriptionEdit->text(), unitEdit->text(),
+                priceEdit->text().toDouble(), quantityEdit->text().toInt())) {
+            QMessageBox::critical(this, "Ошибка", "Не удалось добавить товар");
+        } else {
+            updateProductsTable();
+        }
     });
 
-    connect(cancelButton, &QPushButton::clicked, [&]() {
-        dialog.reject();
-    });
+    connect(refreshButton, &QPushButton::clicked, this, &MainWindow::updateProductsTable);
 
-    dialog.exec();
+    updateProductsTable();
 }
 
-void MainWindow::addProduct() {
-    // Реализация добавления товара
+void MainWindow::setupOperationsUI(QWidget *parent) {
+    auto *layout = new QVBoxLayout(parent);
+    layout->addWidget(new QLabel("Функционал для операций учета будет добавлен здесь", parent));
 }
 
-void MainWindow::editProduct() {
-    // Реализация редактирования товара
+void MainWindow::setupUsersUI(QWidget *parent) {
+    auto *layout = new QVBoxLayout(parent);
+    layout->addWidget(new QLabel("Функционал для работы с пользователями будет добавлен здесь", parent));
 }
 
-void MainWindow::deleteProduct() {
-    // Реализация удаления товара
+void MainWindow::setupReportsUI(QWidget *parent) {
+    auto *layout = new QVBoxLayout(parent);
+    layout->addWidget(new QLabel("Функционал для отчетов будет добавлен здесь", parent));
 }
 
-void MainWindow::generateReport() {
-    // Реализация генерации отчета
+void MainWindow::updateProductsTable() {
+    auto *table = findChild<QTableWidget *>("productsTable");
+    if (!table) return;
+
+    table->setRowCount(0);
+
+    QSqlQuery products = dbManager.getProducts();
+    while (products.next()) {
+        int row = table->rowCount();
+        table->insertRow(row);
+        table->setItem(row, 0, new QTableWidgetItem(products.value("id").toString()));
+        table->setItem(row, 1, new QTableWidgetItem(products.value("name").toString()));
+        table->setItem(row, 2, new QTableWidgetItem(products.value("sku").toString()));
+        table->setItem(row, 3, new QTableWidgetItem(products.value("category_id").toString()));
+        table->setItem(row, 4, new QTableWidgetItem(products.value("description").toString()));
+        table->setItem(row, 5, new QTableWidgetItem(products.value("unit").toString()));
+        table->setItem(row, 6, new QTableWidgetItem(products.value("price").toString()));
+        table->setItem(row, 7, new QTableWidgetItem(products.value("quantity").toString()));
+    }
 }

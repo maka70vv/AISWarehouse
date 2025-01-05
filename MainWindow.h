@@ -2,12 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QTableWidget>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QLineEdit>
-#include <QLabel>
-#include <QDialog>
+#include <QTabWidget>
 #include "DatabaseManager.h"
 
 class MainWindow : public QMainWindow {
@@ -17,24 +12,21 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    private slots:
-        void openDatabaseDialog();
-    void addProduct();
-    void editProduct();
-    void deleteProduct();
-    void generateReport();
-
 private:
-    QTableWidget *productTable;
-    QPushButton *addButton;
-    QPushButton *editButton;
-    QPushButton *deleteButton;
-    QPushButton *reportButton;
-    QPushButton *dbConfigButton;
+    QTabWidget *tabWidget;
+    QWidget *productsTab, *operationsTab, *usersTab, *reportsTab;
+
     DatabaseManager dbManager;
 
-    void initializeUI();
-    void setupConnections();
+    // Методы для настройки вкладок
+    void setupTabs();
+    void setupProductsUI(QWidget *parent);
+    void setupOperationsUI(QWidget *parent);
+    void setupUsersUI(QWidget *parent);
+    void setupReportsUI(QWidget *parent);
+
+    // Метод обновления таблицы товаров
+    void updateProductsTable();
 };
 
 #endif // MAINWINDOW_H
