@@ -12,12 +12,14 @@ public:
     bool connectToDatabase();
     void closeDatabase();
     void setConnectionDetails(const QString &host, int port, const QString &user, const QString &password);
+    void setDatabaseName(const QString &databaseName);
 
 private:
     QString host;
     int port;
     QString user;
     QString password;
+    QString databaseName;
     PGconn *conn;
 };
 

@@ -19,7 +19,9 @@ add_executable(AISWarehouseCPP main.cpp
         MainWindow.h
         MainWindow.cpp
         DatabaseManager.h
-        DatabaseManager.cpp)
+        DatabaseManager.cpp
+        AuthDialog.h
+        AuthDialog.cpp)
 
 # Подключаем библиотеки PostgreSQL и Qt
 target_link_libraries(AISWarehouseCPP
