@@ -1,7 +1,6 @@
 #include "DatabaseManager.h"
 #include <QSqlError>
 #include <QDebug>
-#include <QSqlQuery>
 
 DatabaseManager::DatabaseManager() : port(5432) {}
 
@@ -65,40 +64,6 @@ bool DatabaseManager::addProduct(const QString &name, const QString &sku, int ca
     return true;
 }
 
-bool DatabaseManager::editProduct(int productId, const QString &name, const QString &sku, int categoryId, const QString &description, const QString &unit, double price, int quantity) {
-    QSqlQuery query;
-    query.prepare("UPDATE products SET name = :name, sku = :sku, category_id = :category_id, description = :description, "
-                  "unit = :unit, price = :price, quantity = :quantity WHERE product_id = :product_id");
-    query.bindValue(":name", name);
-    query.bindValue(":sku", sku);
-    query.bindValue(":category_id", categoryId);
-    query.bindValue(":description", description);
-    query.bindValue(":unit", unit);
-    query.bindValue(":price", price);
-    query.bindValue(":quantity", quantity);
-    query.bindValue(":product_id", productId);
-
-    if (!query.exec()) {
-        qDebug() << "Ошибка редактирования товара:" << query.lastError().text();
-        return false;
-    }
-
-    return true;
-}
-
-bool DatabaseManager::deleteProduct(int productId) {
-    QSqlQuery query;
-    query.prepare("DELETE FROM products WHERE product_id = :product_id");
-    query.bindValue(":product_id", productId);
-
-    if (!query.exec()) {
-        qDebug() << "Ошибка удаления товара:" << query.lastError().text();
-        return false;
-    }
-
-    return true;
-}
-
 QSqlQuery DatabaseManager::getProducts() {
     QSqlQuery query;
     if (!query.exec("SELECT product_id, name, sku, category_id, description, unit, price, quantity FROM products")) {
@@ -107,20 +72,25 @@ QSqlQuery DatabaseManager::getProducts() {
     return query;
 }
 
-// Операции учета
-bool DatabaseManager::registerIncoming(int productId, int warehouseId, int quantity, const QString &reason) {
+// Работа с категориями
+bool DatabaseManager::addCategory(const QString &name, const QString &description) {
     QSqlQuery query;
-    query.prepare("INSERT INTO inventory_operations (product_id, warehouse_id, operation_type, quantity, reason) "
-                  "VALUES (:product_id, :warehouse_id, 'incoming', :quantity, :reason)");
-    query.bindValue(":product_id", productId);
-    query.bindValue(":warehouse_id", warehouseId);
-    query.bindValue(":quantity", quantity);
-    query.bindValue(":reason", reason);
+    query.prepare("INSERT INTO categories (name, description) VALUES (:name, :description)");
+    query.bindValue(":name", name);
+    query.bindValue(":description", description);
 
     if (!query.exec()) {
-        qDebug() << "Ошибка регистрации поступления:" << query.lastError().text();
+        qDebug() << "Ошибка добавления категории:" << query.lastError().text();
         return false;
     }
 
     return true;
+}
+
+QSqlQuery DatabaseManager::getCategories() {
+    QSqlQuery query;
+    if (!query.exec("SELECT category_id, name, description FROM categories")) {
+        qDebug() << "Ошибка выполнения запроса на выборку категорий:" << query.lastError().text();
+    }
+    return query;
 }

@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QTabWidget>
+#include <QTableWidget>
 #include "DatabaseManager.h"
 
 class MainWindow : public QMainWindow {
@@ -14,19 +14,16 @@ public:
 
 private:
     QTabWidget *tabWidget;
-    QWidget *productsTab, *operationsTab, *usersTab, *reportsTab;
+    QWidget *productsTab, *categoriesTab;
 
     DatabaseManager dbManager;
 
-    // Методы для настройки вкладок
     void setupTabs();
     void setupProductsUI(QWidget *parent);
-    void setupOperationsUI(QWidget *parent);
-    void setupUsersUI(QWidget *parent);
-    void setupReportsUI(QWidget *parent);
+    void setupCategoriesUI(QWidget *parent);
 
-    // Метод обновления таблицы товаров
     void updateProductsTable();
+    void updateCategoriesTable();
 };
 
 #endif // MAINWINDOW_H
