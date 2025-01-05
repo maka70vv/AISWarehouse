@@ -64,6 +64,40 @@ bool DatabaseManager::addProduct(const QString &name, const QString &sku, int ca
     return true;
 }
 
+bool DatabaseManager::editProduct(int productId, const QString &name, const QString &sku, int categoryId, const QString &description, const QString &unit, double price, int quantity) {
+    QSqlQuery query;
+    query.prepare("UPDATE products SET name = :name, sku = :sku, category_id = :category_id, description = :description, "
+                  "unit = :unit, price = :price, quantity = :quantity WHERE product_id = :product_id");
+    query.bindValue(":name", name);
+    query.bindValue(":sku", sku);
+    query.bindValue(":category_id", categoryId);
+    query.bindValue(":description", description);
+    query.bindValue(":unit", unit);
+    query.bindValue(":price", price);
+    query.bindValue(":quantity", quantity);
+    query.bindValue(":product_id", productId);
+
+    if (!query.exec()) {
+        qDebug() << "Ошибка редактирования товара:" << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}
+
+bool DatabaseManager::deleteProduct(int productId) {
+    QSqlQuery query;
+    query.prepare("DELETE FROM products WHERE product_id = :product_id");
+    query.bindValue(":product_id", productId);
+
+    if (!query.exec()) {
+        qDebug() << "Ошибка удаления товара:" << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}
+
 QSqlQuery DatabaseManager::getProducts() {
     QSqlQuery query;
     if (!query.exec("SELECT product_id, name, sku, category_id, description, unit, price, quantity FROM products")) {
@@ -81,6 +115,34 @@ bool DatabaseManager::addCategory(const QString &name, const QString &descriptio
 
     if (!query.exec()) {
         qDebug() << "Ошибка добавления категории:" << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}
+
+bool DatabaseManager::editCategory(int categoryId, const QString &name, const QString &description) {
+    QSqlQuery query;
+    query.prepare("UPDATE categories SET name = :name, description = :description WHERE category_id = :category_id");
+    query.bindValue(":name", name);
+    query.bindValue(":description", description);
+    query.bindValue(":category_id", categoryId);
+
+    if (!query.exec()) {
+        qDebug() << "Ошибка редактирования категории:" << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}
+
+bool DatabaseManager::deleteCategory(int categoryId) {
+    QSqlQuery query;
+    query.prepare("DELETE FROM categories WHERE category_id = :category_id");
+    query.bindValue(":category_id", categoryId);
+
+    if (!query.exec()) {
+        qDebug() << "Ошибка удаления категории:" << query.lastError().text();
         return false;
     }
 

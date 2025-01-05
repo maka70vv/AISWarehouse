@@ -18,10 +18,12 @@ private:
 
     DatabaseManager dbManager;
 
+    // Настройка вкладок
     void setupTabs();
     void setupProductsUI(QWidget *parent);
     void setupCategoriesUI(QWidget *parent);
 
+    // Обновление таблиц
     void updateProductsTable();
     void updateCategoriesTable();
 };

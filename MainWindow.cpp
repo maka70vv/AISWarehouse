@@ -40,7 +40,7 @@ void MainWindow::setupProductsUI(QWidget *parent) {
     layout->addWidget(nameEdit);
     layout->addWidget(new QLabel("Артикул:", parent));
     layout->addWidget(skuEdit);
-    layout->addWidget(new QLabel("Категория:", parent));
+    layout->addWidget(new QLabel("Категория (ID):", parent));
     layout->addWidget(categoryEdit);
     layout->addWidget(new QLabel("Описание:", parent));
     layout->addWidget(descriptionEdit);
@@ -58,9 +58,13 @@ void MainWindow::setupProductsUI(QWidget *parent) {
     layout->addWidget(table);
 
     auto *addButton = new QPushButton("Добавить", parent);
+    auto *editButton = new QPushButton("Редактировать", parent);
+    auto *deleteButton = new QPushButton("Удалить", parent);
     auto *refreshButton = new QPushButton("Обновить", parent);
 
     layout->addWidget(addButton);
+    layout->addWidget(editButton);
+    layout->addWidget(deleteButton);
     layout->addWidget(refreshButton);
 
     connect(addButton, &QPushButton::clicked, [this, nameEdit, skuEdit, categoryEdit, descriptionEdit, unitEdit, priceEdit, quantityEdit]() {
@@ -69,6 +73,37 @@ void MainWindow::setupProductsUI(QWidget *parent) {
                 descriptionEdit->text(), unitEdit->text(),
                 priceEdit->text().toDouble(), quantityEdit->text().toInt())) {
             QMessageBox::critical(this, "Ошибка", "Не удалось добавить товар");
+        } else {
+            updateProductsTable();
+        }
+    });
+
+    connect(editButton, &QPushButton::clicked, [this, table, nameEdit, skuEdit, categoryEdit, descriptionEdit, unitEdit, priceEdit, quantityEdit]() {
+        int currentRow = table->currentRow();
+        if (currentRow < 0) {
+            QMessageBox::warning(this, "Ошибка", "Выберите строку для редактирования");
+            return;
+        }
+        int productId = table->item(currentRow, 0)->text().toInt();
+        if (!dbManager.editProduct(productId,
+                                   nameEdit->text(), skuEdit->text(), categoryEdit->text().toInt(),
+                                   descriptionEdit->text(), unitEdit->text(),
+                                   priceEdit->text().toDouble(), quantityEdit->text().toInt())) {
+            QMessageBox::critical(this, "Ошибка", "Не удалось редактировать товар");
+        } else {
+            updateProductsTable();
+        }
+    });
+
+    connect(deleteButton, &QPushButton::clicked, [this, table]() {
+        int currentRow = table->currentRow();
+        if (currentRow < 0) {
+            QMessageBox::warning(this, "Ошибка", "Выберите строку для удаления");
+            return;
+        }
+        int productId = table->item(currentRow, 0)->text().toInt();
+        if (!dbManager.deleteProduct(productId)) {
+            QMessageBox::critical(this, "Ошибка", "Не удалось удалить товар");
         } else {
             updateProductsTable();
         }
@@ -97,14 +132,46 @@ void MainWindow::setupCategoriesUI(QWidget *parent) {
     layout->addWidget(table);
 
     auto *addButton = new QPushButton("Добавить", parent);
+    auto *editButton = new QPushButton("Редактировать", parent);
+    auto *deleteButton = new QPushButton("Удалить", parent);
     auto *refreshButton = new QPushButton("Обновить", parent);
 
     layout->addWidget(addButton);
+    layout->addWidget(editButton);
+    layout->addWidget(deleteButton);
     layout->addWidget(refreshButton);
 
     connect(addButton, &QPushButton::clicked, [this, nameEdit, descriptionEdit]() {
         if (!dbManager.addCategory(nameEdit->text(), descriptionEdit->text())) {
             QMessageBox::critical(this, "Ошибка", "Не удалось добавить категорию");
+        } else {
+            updateCategoriesTable();
+        }
+    });
+
+    connect(editButton, &QPushButton::clicked, [this, table, nameEdit, descriptionEdit]() {
+        int currentRow = table->currentRow();
+        if (currentRow < 0) {
+            QMessageBox::warning(this, "Ошибка", "Выберите строку для редактирования");
+            return;
+        }
+        int categoryId = table->item(currentRow, 0)->text().toInt();
+        if (!dbManager.editCategory(categoryId, nameEdit->text(), descriptionEdit->text())) {
+            QMessageBox::critical(this, "Ошибка", "Не удалось редактировать категорию");
+        } else {
+            updateCategoriesTable();
+        }
+    });
+
+    connect(deleteButton, &QPushButton::clicked, [this, table]() {
+        int currentRow = table->currentRow();
+        if (currentRow < 0) {
+            QMessageBox::warning(this, "Ошибка", "Выберите строку для удаления");
+            return;
+        }
+        int categoryId = table->item(currentRow, 0)->text().toInt();
+        if (!dbManager.deleteCategory(categoryId)) {
+            QMessageBox::critical(this, "Ошибка", "Не удалось удалить категорию");
         } else {
             updateCategoriesTable();
         }
@@ -146,7 +213,7 @@ void MainWindow::updateCategoriesTable() {
     while (categories.next()) {
         int row = table->rowCount();
         table->insertRow(row);
-        table->setItem(row, 0, new QTableWidgetItem(categories.value("id").toString()));
+        table->setItem(row, 0, new QTableWidgetItem(categories.value("category_id").toString()));
         table->setItem(row, 1, new QTableWidgetItem(categories.value("name").toString()));
         table->setItem(row, 2, new QTableWidgetItem(categories.value("description").toString()));
     }
