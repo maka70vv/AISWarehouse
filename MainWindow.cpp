@@ -2,6 +2,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QComboBox>
 #include <QLabel>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -262,16 +263,53 @@ void MainWindow::updateCategoriesTable() {
 
 void MainWindow::setupOperationsUi(QWidget *parent) {
     auto *layout = new QVBoxLayout(parent);
-
     auto *table = new QTableWidget(parent);
+
+    auto *productIdEdit = new QLineEdit(parent);
+    auto *warehouseIdEdit = new QLineEdit(parent);
+    auto *operationTypeComboBox = new QComboBox(parent);
+    auto *quantity = new QLineEdit(parent);
+    auto *reason = new QLineEdit(parent);
+
     table->setObjectName("inventory_operations");
     table->setColumnCount(7);
     table->setHorizontalHeaderLabels({"ID", "ID продукта", "ID склада", "Тип операции", "Количество", "Причина", "Дата"});
     layout->addWidget(table);
 
     auto *refreshButton = new QPushButton("Обновить", parent);
+    auto *addButton = new QPushButton("Добавить", parent);
 
     layout->addWidget(refreshButton);
+    layout->addWidget(addButton);
+
+    layout->addWidget(new QLabel("ID продукта:", parent));
+    layout->addWidget(productIdEdit);
+    layout->addWidget(new QLabel("ID склада:", parent));
+    layout->addWidget(warehouseIdEdit);
+    operationTypeComboBox->addItems({"поступление", "отгрузка", "списание"});
+    layout->addWidget(new QLabel("Тип операции:", parent));
+    layout->addWidget(operationTypeComboBox);
+    layout->addWidget(new QLabel("Количество:", parent));
+    layout->addWidget(quantity);
+    layout->addWidget(new QLabel("Причина:", parent));
+    layout->addWidget(reason);
+
+    QString operationType = operationTypeComboBox->currentText();
+
+
+    connect(addButton, &QPushButton::clicked, [this, productIdEdit, warehouseIdEdit, operationType, quantity, reason]() {
+        if (!dbManager.addOperation(
+                productIdEdit->text().toInt(),   // Передаем int напрямую
+                warehouseIdEdit->text().toInt(), // Передаем int напрямую
+                operationType,                  // Тип операции передается как строка
+                quantity->text().toInt(),       // Передаем int напрямую
+                reason->text()                  // Причина передается как QString
+            )) {
+            QMessageBox::critical(this, "Ошибка", "Не удалось добавить операцию");
+        } else {
+            updateProductsTable();
+        }
+    });
 
     connect(refreshButton, &QPushButton::clicked, this, &MainWindow::updateCategoriesTable);
 

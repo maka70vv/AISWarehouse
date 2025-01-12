@@ -30,6 +30,8 @@ public:
     QSqlQuery getCategories();
 
     QSqlQuery getOperations();
+    bool addOperation(int product_id, int warehouse_id, const QString& operation_type,
+                      int quantity, const QString& reason);
 
     std::vector<std::map<QString, QString>> fetchDataForReport(const QString &tableName);
     bool generateCSVReport(const QString &tableName, const QString &filePath);

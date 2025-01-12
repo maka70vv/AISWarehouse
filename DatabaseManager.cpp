@@ -224,3 +224,21 @@ QSqlQuery DatabaseManager::getOperations() {
     }
     return query;
 }
+
+
+bool DatabaseManager::addOperation(int product_id, int warehouse_id, const QString &operation_type, int quantity, const QString &reason) {
+    QSqlQuery query;
+    query.prepare("INSERT INTO inventory_operations (product_id, warehouse_id, operation_type, quantity, reason) VALUES (:product_id, :warehouse_id, :operation_type, :quantity, :reason)");
+    query.bindValue(":product_id", product_id);
+    query.bindValue(":operation_type", operation_type);
+    query.bindValue(":warehouse_id", warehouse_id);
+    query.bindValue(":quantity", quantity);
+    query.bindValue(":reason", reason);
+
+    if (!query.exec()) {
+        qDebug() << "Ошибка добавления категории:" << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}
