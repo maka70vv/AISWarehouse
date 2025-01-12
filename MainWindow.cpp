@@ -9,6 +9,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <QSqlError>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupTabs();
@@ -271,17 +272,6 @@ void MainWindow::setupOperationsUi(QWidget *parent) {
     auto *quantity = new QLineEdit(parent);
     auto *reason = new QLineEdit(parent);
 
-    table->setObjectName("inventory_operations");
-    table->setColumnCount(7);
-    table->setHorizontalHeaderLabels({"ID", "ID продукта", "ID склада", "Тип операции", "Количество", "Причина", "Дата"});
-    layout->addWidget(table);
-
-    auto *refreshButton = new QPushButton("Обновить", parent);
-    auto *addButton = new QPushButton("Добавить", parent);
-
-    layout->addWidget(refreshButton);
-    layout->addWidget(addButton);
-
     layout->addWidget(new QLabel("ID продукта:", parent));
     layout->addWidget(productIdEdit);
     layout->addWidget(new QLabel("ID склада:", parent));
@@ -293,6 +283,17 @@ void MainWindow::setupOperationsUi(QWidget *parent) {
     layout->addWidget(quantity);
     layout->addWidget(new QLabel("Причина:", parent));
     layout->addWidget(reason);
+
+    table->setObjectName("inventory_operations");
+    table->setColumnCount(7);
+    table->setHorizontalHeaderLabels({"ID", "ID продукта", "ID склада", "Тип операции", "Количество", "Причина", "Дата"});
+    layout->addWidget(table);
+
+    auto *refreshButton = new QPushButton("Обновить", parent);
+    auto *addButton = new QPushButton("Добавить", parent);
+
+    layout->addWidget(addButton);
+    layout->addWidget(refreshButton);
 
     QString operationType = operationTypeComboBox->currentText();
 
@@ -311,9 +312,9 @@ void MainWindow::setupOperationsUi(QWidget *parent) {
         }
     });
 
-    connect(refreshButton, &QPushButton::clicked, this, &MainWindow::updateCategoriesTable);
+    connect(refreshButton, &QPushButton::clicked, this, &MainWindow::updateOperationsTable);
 
-    updateCategoriesTable();
+    updateOperationsTable();
 }
 
 
@@ -323,16 +324,17 @@ void MainWindow::updateOperationsTable() {
 
     table->setRowCount(0);
 
-    QSqlQuery categories = dbManager.getCategories();
-    while (categories.next()) {
+    QSqlQuery operations = dbManager.getOperations();
+
+    while (operations.next()) {
         int row = table->rowCount();
         table->insertRow(row);
-        table->setItem(row, 0, new QTableWidgetItem(categories.value("operation_id").toString()));
-        table->setItem(row, 1, new QTableWidgetItem(categories.value("product_id").toString()));
-        table->setItem(row, 2, new QTableWidgetItem(categories.value("warehouse_id").toString()));
-        table->setItem(row, 2, new QTableWidgetItem(categories.value("operation_type").toString()));
-        table->setItem(row, 2, new QTableWidgetItem(categories.value("quantity").toString()));
-        table->setItem(row, 2, new QTableWidgetItem(categories.value("reason").toString()));
-        table->setItem(row, 2, new QTableWidgetItem(categories.value("created_at").toString()));
+        table->setItem(row, 0, new QTableWidgetItem(operations.value("operation_id").toString()));
+        table->setItem(row, 1, new QTableWidgetItem(operations.value("product_id").toString()));
+        table->setItem(row, 2, new QTableWidgetItem(operations.value("warehouse_id").toString()));
+        table->setItem(row, 3, new QTableWidgetItem(operations.value("operation_type").toString()));
+        table->setItem(row, 4, new QTableWidgetItem(operations.value("quantity").toString()));
+        table->setItem(row, 5, new QTableWidgetItem(operations.value("reason").toString()));
+        table->setItem(row, 6, new QTableWidgetItem(operations.value("created_at").toString()));
     }
 }
