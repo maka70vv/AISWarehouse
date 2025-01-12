@@ -1,9 +1,11 @@
 #ifndef DATABASEMANAGER_H
 #define DATABASEMANAGER_H
 
+#include <map>
 #include <QString>
 #include <QSqlQuery>
 #include <QSqlDatabase>
+#include <vector>
 
 class DatabaseManager {
 public:
@@ -26,6 +28,10 @@ public:
     bool editCategory(int categoryId, const QString &name, const QString &description);
     bool deleteCategory(int categoryId);
     QSqlQuery getCategories();
+
+    std::vector<std::map<QString, QString>> fetchDataForReport(); // Новый метод для выборки данных
+    bool generateCSVReport(const QString &filePath); // Новый метод для генерации CSV
+
 
 private:
     QString host;

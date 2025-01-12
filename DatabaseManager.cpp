@@ -1,5 +1,9 @@
 #include "DatabaseManager.h"
 #include <QSqlError>
+#include <QFile>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlRecord>
 #include <QDebug>
 
 DatabaseManager::DatabaseManager() : port(5432) {}
@@ -7,6 +11,51 @@ DatabaseManager::DatabaseManager() : port(5432) {}
 DatabaseManager::~DatabaseManager() {
     closeDatabase();
 }
+
+std::vector<std::map<QString, QString>> DatabaseManager::fetchDataForReport() {
+    std::vector<std::map<QString, QString>> data;
+    QSqlQuery query("SELECT * FROM table_name"); // Замените table_name на вашу таблицу
+
+    while (query.next()) {
+        QSqlRecord record = query.record();
+        std::map<QString, QString> row;
+        for (int i = 0; i < record.count(); ++i) {
+            row[record.fieldName(i)] = query.value(i).toString();
+        }
+        data.push_back(row);
+    }
+    return data;
+}
+
+bool DatabaseManager::generateCSVReport(const QString &filePath) {
+    auto data = fetchDataForReport();
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "Failed to open file for writing: " << filePath;
+        return false;
+    }
+
+    QTextStream out(&file);
+    if (!data.empty()) {
+        // Write header
+        for (const auto &header : data[0]) {
+            out << header.first << ",";
+        }
+        out << "\n";
+
+        // Write rows
+        for (const auto &row : data) {
+            for (const auto &cell : row) {
+                out << cell.second << ",";
+            }
+            out << "\n";
+        }
+    }
+
+    file.close();
+    return true;
+}
+
 
 void DatabaseManager::setConnectionDetails(const QString &host, int port, const QString &user, const QString &password) {
     this->host = host;

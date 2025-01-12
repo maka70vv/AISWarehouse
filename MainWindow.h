@@ -10,6 +10,8 @@ class MainWindow : public QMainWindow {
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+    void addGenerateReportMenu();
+    void onGenerateReport();
     ~MainWindow();
 
 private:

@@ -3,11 +3,35 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QLabel>
+#include <QFileDialog>
 #include <QMessageBox>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupTabs();
+    addGenerateReportMenu(); // Добавление меню
 }
+
+void MainWindow::addGenerateReportMenu() {
+    QMenu *fileMenu = menuBar()->addMenu("ОТЧЕТЫ");
+    QAction *generateReportAction = new QAction("CSV ОТЧЕТ", this);
+    connect(generateReportAction, &QAction::triggered, this, &MainWindow::onGenerateReport);
+    fileMenu->addAction(generateReportAction);
+}
+
+void MainWindow::onGenerateReport() {
+    QString filePath = QFileDialog::getSaveFileName(this, "Сохранить CSV отчет", "", "CSV Файлы (*.csv)");
+    if (!filePath.isEmpty()) {
+        if (dbManager.generateCSVReport(filePath)) {
+            QMessageBox::information(this, "УСПЕХ", "CSV отчет успешно сгенерирован.");
+        } else {
+            QMessageBox::warning(this, "ОШИБКА", "Ошибка при генерации CSV отчета.");
+        }
+    }
+}
+
 
 MainWindow::~MainWindow() {}
 
