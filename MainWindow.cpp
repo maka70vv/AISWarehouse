@@ -295,20 +295,19 @@ void MainWindow::setupOperationsUi(QWidget *parent) {
     layout->addWidget(addButton);
     layout->addWidget(refreshButton);
 
-    QString operationType = operationTypeComboBox->currentText();
+    connect(addButton, &QPushButton::clicked, [this, productIdEdit, warehouseIdEdit, operationTypeComboBox, quantity, reason]() {
+        QString operationType = operationTypeComboBox->currentText(); // Получаем текущее значение
 
-
-    connect(addButton, &QPushButton::clicked, [this, productIdEdit, warehouseIdEdit, operationType, quantity, reason]() {
         if (!dbManager.addOperation(
-                productIdEdit->text().toInt(),   // Передаем int напрямую
+                productIdEdit->text().toInt(),    // Передаем int напрямую
                 warehouseIdEdit->text().toInt(), // Передаем int напрямую
-                operationType,                  // Тип операции передается как строка
-                quantity->text().toInt(),       // Передаем int напрямую
-                reason->text()                  // Причина передается как QString
+                operationType,                   // Тип операции передается как строка
+                quantity->text().toInt(),        // Передаем int напрямую
+                reason->text()                   // Причина передается как QString
             )) {
             QMessageBox::critical(this, "Ошибка", "Не удалось добавить операцию");
         } else {
-            updateProductsTable();
+            updateOperationsTable(); // Обновляем таблицу операций
         }
     });
 
