@@ -29,8 +29,8 @@ public:
     bool deleteCategory(int categoryId);
     QSqlQuery getCategories();
 
-    std::vector<std::map<QString, QString>> fetchDataForReport(); // Новый метод для выборки данных
-    bool generateCSVReport(const QString &filePath); // Новый метод для генерации CSV
+    std::vector<std::map<QString, QString>> fetchDataForReport(const QString &tableName);
+    bool generateCSVReport(const QString &tableName, const QString &filePath);
 
 
 private:

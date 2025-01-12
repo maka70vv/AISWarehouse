@@ -12,9 +12,17 @@ DatabaseManager::~DatabaseManager() {
     closeDatabase();
 }
 
-std::vector<std::map<QString, QString>> DatabaseManager::fetchDataForReport() {
+std::vector<std::map<QString, QString>> DatabaseManager::fetchDataForReport(const QString &tableName) {
     std::vector<std::map<QString, QString>> data;
-    QSqlQuery query("SELECT * FROM table_name"); // Замените table_name на вашу таблицу
+
+    // Формируем SQL-запрос с использованием имени таблицы
+    QSqlQuery query;
+    query.prepare("SELECT * FROM " + tableName);
+
+    if (!query.exec()) {
+        qDebug() << "Failed to execute query for table:" << tableName << "Error:" << query.lastError().text();
+        return data; // Возвращаем пустой результат при ошибке
+    }
 
     while (query.next()) {
         QSqlRecord record = query.record();
@@ -27,8 +35,9 @@ std::vector<std::map<QString, QString>> DatabaseManager::fetchDataForReport() {
     return data;
 }
 
-bool DatabaseManager::generateCSVReport(const QString &filePath) {
-    auto data = fetchDataForReport();
+
+bool DatabaseManager::generateCSVReport(const QString &tableName, const QString &filePath) {
+    auto data = fetchDataForReport(tableName);;
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qDebug() << "Failed to open file for writing: " << filePath;

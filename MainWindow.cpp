@@ -22,9 +22,10 @@ void MainWindow::addGenerateReportMenu() {
 }
 
 void MainWindow::onGenerateReport() {
+    QString tableName = "products";
     QString filePath = QFileDialog::getSaveFileName(this, "Сохранить CSV отчет", "", "CSV Файлы (*.csv)");
     if (!filePath.isEmpty()) {
-        if (dbManager.generateCSVReport(filePath)) {
+        if (dbManager.generateCSVReport(tableName, filePath)) {
             QMessageBox::information(this, "УСПЕХ", "CSV отчет успешно сгенерирован.");
         } else {
             QMessageBox::warning(this, "ОШИБКА", "Ошибка при генерации CSV отчета.");
