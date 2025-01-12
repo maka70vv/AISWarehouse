@@ -22,7 +22,18 @@ void MainWindow::addGenerateReportMenu() {
 }
 
 void MainWindow::onGenerateReport() {
-    QString tableName = "products";
+    QString tableName;
+
+    int currentIndex = tabWidget->currentIndex();
+    if (currentIndex == 0) {
+        tableName = "products";
+    } else if (currentIndex == 1) {
+        tableName = "categories";
+    } else {
+        QMessageBox::warning(this, "Ошибка", "Неизвестная вкладка.");
+        return;
+    }
+
     QString filePath = QFileDialog::getSaveFileName(this, "Сохранить CSV отчет", "", "CSV Файлы (*.csv)");
     if (!filePath.isEmpty()) {
         if (dbManager.generateCSVReport(tableName, filePath)) {
