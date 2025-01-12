@@ -16,7 +16,7 @@ public:
 
 private:
     QTabWidget *tabWidget;
-    QWidget *productsTab, *categoriesTab;
+    QWidget *productsTab, *categoriesTab, *operationsTab;
 
     DatabaseManager dbManager;
 
@@ -24,10 +24,13 @@ private:
     void setupTabs();
     void setupProductsUI(QWidget *parent);
     void setupCategoriesUI(QWidget *parent);
+    void setupOperationsUI(QWidget *parent);
 
     // Обновление таблиц
     void updateProductsTable();
     void updateCategoriesTable();
+    void setupOperationsUi(QWidget* parent);
+    void updateOperationsTable();
 };
 
 #endif // MAINWINDOW_H

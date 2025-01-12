@@ -29,6 +29,8 @@ void MainWindow::onGenerateReport() {
         tableName = "products";
     } else if (currentIndex == 1) {
         tableName = "categories";
+    }  else if (currentIndex == 2) {
+        tableName = "inventory_operations";
     } else {
         QMessageBox::warning(this, "Ошибка", "Неизвестная вкладка.");
         return;
@@ -53,12 +55,15 @@ void MainWindow::setupTabs() {
 
     productsTab = new QWidget();
     categoriesTab = new QWidget();
+    operationsTab = new QWidget();
 
     tabWidget->addTab(productsTab, "Товары");
     tabWidget->addTab(categoriesTab, "Категории");
+    tabWidget->addTab(operationsTab, "Операции");
 
     setupProductsUI(productsTab);
     setupCategoriesUI(categoriesTab);
+    setupOperationsUi(operationsTab);
 }
 
 void MainWindow::setupProductsUI(QWidget *parent) {
@@ -252,5 +257,44 @@ void MainWindow::updateCategoriesTable() {
         table->setItem(row, 0, new QTableWidgetItem(categories.value("category_id").toString()));
         table->setItem(row, 1, new QTableWidgetItem(categories.value("name").toString()));
         table->setItem(row, 2, new QTableWidgetItem(categories.value("description").toString()));
+    }
+}
+
+void MainWindow::setupOperationsUi(QWidget *parent) {
+    auto *layout = new QVBoxLayout(parent);
+
+    auto *table = new QTableWidget(parent);
+    table->setObjectName("inventory_operations");
+    table->setColumnCount(7);
+    table->setHorizontalHeaderLabels({"ID", "ID продукта", "ID склада", "Тип операции", "Количество", "Причина", "Дата"});
+    layout->addWidget(table);
+
+    auto *refreshButton = new QPushButton("Обновить", parent);
+
+    layout->addWidget(refreshButton);
+
+    connect(refreshButton, &QPushButton::clicked, this, &MainWindow::updateCategoriesTable);
+
+    updateCategoriesTable();
+}
+
+
+void MainWindow::updateOperationsTable() {
+    auto *table = findChild<QTableWidget *>("inventory_operations");
+    if (!table) return;
+
+    table->setRowCount(0);
+
+    QSqlQuery categories = dbManager.getCategories();
+    while (categories.next()) {
+        int row = table->rowCount();
+        table->insertRow(row);
+        table->setItem(row, 0, new QTableWidgetItem(categories.value("operation_id").toString()));
+        table->setItem(row, 1, new QTableWidgetItem(categories.value("product_id").toString()));
+        table->setItem(row, 2, new QTableWidgetItem(categories.value("warehouse_id").toString()));
+        table->setItem(row, 2, new QTableWidgetItem(categories.value("operation_type").toString()));
+        table->setItem(row, 2, new QTableWidgetItem(categories.value("quantity").toString()));
+        table->setItem(row, 2, new QTableWidgetItem(categories.value("reason").toString()));
+        table->setItem(row, 2, new QTableWidgetItem(categories.value("created_at").toString()));
     }
 }

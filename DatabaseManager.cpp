@@ -214,3 +214,13 @@ QSqlQuery DatabaseManager::getCategories() {
     }
     return query;
 }
+
+
+
+QSqlQuery DatabaseManager::getOperations() {
+    QSqlQuery query;
+    if (!query.exec("SELECT operation_id, product_id, warehouse_id, operation_type, quantity, reason, created_at FROM products")) {
+        qDebug() << "Ошибка выполнения запроса на выборку товаров:" << query.lastError().text();
+    }
+    return query;
+}
